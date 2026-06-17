@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Seadragon strandings dashboard — Sydney 2022</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--abyss:#07171f;--deep:#0c2330;--panel:#102f3f;--line:#1d4456;--ink:#e8f3f4;--muted:#7fa3ad;--faint:#5b8390;
+    --coral:#ff7a4d;--wave:#54d2c4;--period:#ffd45e;--energy:#c08bff;--wind:#7fd1ff;--orbit:#ff9bd0;--grid:#163645}
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(120% 80% at 80% -10%,#123244 0%,transparent 60%),var(--abyss);color:var(--ink);
+    font-family:"Inter",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:var(--wave)} .mono{font-family:"Spline Sans Mono",monospace}
+  .tile{background:linear-gradient(180deg,var(--panel),var(--deep));border:1px solid var(--line);border-radius:12px;
+    padding:7px 10px 5px;display:flex;flex-direction:column;min-height:0}
+  .th{font-family:"Spline Sans Mono",monospace;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+    margin:0 0 3px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex:0 0 auto}
+  .thr{display:flex;align-items:center;gap:7px;flex-shrink:0}
+  .th .leg{color:var(--faint);font-size:9px;letter-spacing:.03em;text-transform:none}
+  .exp{font-family:"Spline Sans Mono",monospace;font-size:9px;background:var(--deep);border:1px solid var(--line);color:var(--muted);
+    border-radius:6px;padding:2px 7px;cursor:pointer;white-space:nowrap;letter-spacing:.02em}
+  .exp:hover{color:var(--ink);border-color:var(--coral)}
+  .body{flex:1 1 auto;min-height:0;position:relative} svg{display:block;width:100%;height:100%}
+  .topbar{display:flex;align-items:center;gap:13px;flex-wrap:wrap;flex:0 0 auto}
+  .topbar h1{font-family:"Bebas Neue",Impact,sans-serif;font-weight:400;font-size:25px;line-height:1;margin:0;letter-spacing:.01em}
+  .topbar h1 .hl{color:var(--coral)} .topbar .src{font-family:"Spline Sans Mono",monospace;font-size:10.5px;color:var(--faint)}
+  #status{font-family:"Spline Sans Mono",monospace;font-size:10.5px;color:var(--period)} #status.err{color:var(--coral)}
+  .seg{display:inline-flex;background:var(--deep);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .seg button{font-family:"Spline Sans Mono",monospace;font-size:10.5px;background:transparent;color:var(--muted);border:0;padding:6px 10px;cursor:pointer}
+  .seg button.on{background:var(--coral);color:#1a0e06;font-weight:500} .seg.sm button{padding:4px 8px;font-size:9.5px}
+  button.retry{font-family:"Spline Sans Mono",monospace;font-size:10.5px;background:var(--line);color:var(--ink);border:0;border-radius:7px;padding:5px 11px;cursor:pointer}
+  .flags{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 3px;flex:0 0 auto}
+  .flags button{font-family:"Spline Sans Mono",monospace;font-size:9.5px;background:var(--deep);border:1px solid var(--line);border-radius:20px;
+    padding:3px 9px 3px 7px;cursor:pointer;color:var(--ink);display:inline-flex;align-items:center;gap:5px}
+  .flags button .dot{width:8px;height:8px;border-radius:50%;display:inline-block} .flags button .dot.dash{border-radius:0;height:3px;width:11px}
+  .flags button.off{opacity:.4;text-decoration:line-through}
+  .orbctl{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-bottom:5px;flex:0 0 auto}
+  .orbctl .sl{display:flex;flex-direction:column;min-width:96px;flex:1} .orbctl label{font-family:"Spline Sans Mono",monospace;font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+  .orbctl .val{color:var(--ink)} input[type=range]{width:100%;accent-color:var(--coral);height:13px}
+  .orbcharts{display:flex;gap:6px;flex:1 1 auto;min-height:0} .orbcharts #orbCol{flex:0 0 37%} .orbcharts #orbProf{flex:1;min-width:0}
+  .readout{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:5px;flex:0 0 auto}
+  .readout div{background:var(--deep);border:1px solid var(--line);border-radius:7px;padding:5px 7px}
+  .readout .k{font-family:"Spline Sans Mono",monospace;font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  .readout .v{font-family:"Bebas Neue",Impact,sans-serif;font-size:18px;line-height:1.05;color:var(--ink)} .readout .v small{font-family:"Inter";font-size:9px;color:var(--faint);font-weight:400}
+  .verdict{margin-top:5px;padding:6px 9px;border-left:2px solid var(--orbit);background:rgba(255,155,208,.06);border-radius:0 7px 7px 0;font-size:10.5px;line-height:1.4;color:var(--ink);flex:0 0 auto} .verdict b{color:var(--ink)}
+  .locrow{display:flex;gap:6px;height:100%} .locrow #coast{flex:0 0 30%;height:100%} .locrow #chartLoc{flex:1;min-width:0;height:100%}
+  .dhead{display:flex;gap:9px;align-items:baseline;flex-wrap:wrap} .dhead .wk{font-family:"Bebas Neue",Impact,sans-serif;font-size:18px;color:var(--coral);line-height:1} .dhead .meta{font-family:"Spline Sans Mono",monospace;font-size:9.5px;color:var(--muted)}
+  /* fullscreen */
+  .backdrop{position:fixed;inset:0;background:rgba(5,17,23,.86);z-index:900;display:none} .backdrop.on{display:block}
+  .tile.full{position:fixed;inset:14px;z-index:1000;margin:0;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  /* mobile first */
+  .app{padding:13px;display:flex;flex-direction:column;gap:9px}
+  .row1{display:flex;flex-direction:column;gap:9px} .colL,.colR{display:flex;flex-direction:column;gap:9px}
+  .tile{min-height:240px} #tileOrbit{min-height:460px} #tileDetail{min-height:170px} svg{height:auto}
+  @media(min-width:980px){
+    body{height:100vh;overflow-y:auto} .app{height:100vh;padding:11px 15px 9px;gap:8px}
+    .row1{flex:1 1 auto;flex-direction:row;min-height:0} .colL{flex:1.5;min-width:0} .colR{flex:1.18;min-width:0}
+    .tile{min-height:0!important}
+    #tileTop{flex:1.35} #tileSwell{flex:.8} #tileWind{flex:.95} #tileDetail{flex:.72}
+    #tileLoc{flex:.68} #tileOrbit{flex:2.4;overflow:auto}
+    svg{height:100%} .tile.full svg{height:100%}
+  }
+  .scrollcue{text-align:center;color:var(--faint);font-family:"Spline Sans Mono",monospace;font-size:10.5px;padding:5px 0 0}
+  .below{padding:24px 16px 40px;max-width:1020px;margin:0 auto}
+  .below h2{font-family:"Spline Sans Mono",monospace;font-weight:500;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+  .below .card{background:linear-gradient(180deg,var(--panel),var(--deep));border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:18px}
+  .belowgrid{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap} .belowgrid>.card{flex:1 1 400px;min-width:0;margin-bottom:18px}
+  table{width:100%;border-collapse:collapse;font-size:13px} th,td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--grid)}
+  th:first-child,td:first-child{text-align:left} th{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+  td{font-family:"Spline Sans Mono",monospace} td.dir{color:var(--period)} td.en{color:var(--energy)} td.wd{color:var(--wind)}
+  tr.sel td{background:rgba(255,122,77,.14)} tr.clk{cursor:pointer} tr.clk:hover td{background:rgba(84,210,196,.08)} .compass{margin-left:6px;color:var(--faint)}
+  .prose{font-size:14px;color:var(--ink)} .prose p{margin:0 0 12px} .prose b{color:var(--ink)} .prose .small{color:var(--faint);font-size:12.5px}
+  .prose .formula{background:var(--deep);border:1px solid var(--line);border-radius:8px;padding:11px 14px;font-family:"Spline Sans Mono",monospace;font-size:13px;color:var(--wave);margin:10px 0;overflow-x:auto;white-space:pre}
+  .foot{color:var(--faint);font-size:12px;line-height:1.7} .foot b{color:var(--muted)} .hit{cursor:pointer}
+
+  /* ask-the-data */
+  .ask-btn{font-family:"Spline Sans Mono",monospace;font-size:10.5px;letter-spacing:.03em;background:linear-gradient(135deg,var(--coral),#ffb27a);
+    color:#1a0e06;border:0;border-radius:8px;padding:6px 12px;cursor:pointer;font-weight:600}
+  .ask-btn:hover{filter:brightness(1.08)}
+  #aiScrim{position:fixed;inset:0;background:rgba(5,17,23,.6);z-index:1100;opacity:0;pointer-events:none;transition:opacity .2s}
+  #aiScrim.open{opacity:1;pointer-events:auto}
+  #ai{position:fixed;top:0;right:0;height:100vh;width:min(420px,92vw);z-index:1200;display:flex;flex-direction:column;
+    background:linear-gradient(180deg,var(--panel),var(--deep));border-left:1px solid var(--line);transform:translateX(100%);
+    transition:transform .24s ease;box-shadow:-20px 0 60px rgba(0,0,0,.45)}
+  #ai.open{transform:none}
+  .ahead{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);flex:0 0 auto}
+  .ahead .dot2{width:9px;height:9px;border-radius:50%;background:var(--coral);box-shadow:0 0 10px var(--coral)}
+  .ahead h2{font-family:"Bebas Neue",Impact,sans-serif;font-weight:400;font-size:20px;margin:0;letter-spacing:.02em;flex:1}
+  .ahead .close{background:transparent;border:0;color:var(--muted);font-size:15px;cursor:pointer} .ahead .close:hover{color:var(--ink)}
+  #aiMsgs{flex:1 1 auto;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+  .aimsg{font-size:13.5px;line-height:1.5;max-width:93%} .aimsg p{margin:0 0 8px} .aimsg strong{color:var(--ink);font-weight:600}
+  .aimsg.u{align-self:flex-end;background:rgba(255,122,77,.16);border:1px solid rgba(255,122,77,.3);color:var(--ink);padding:8px 11px;border-radius:12px 12px 3px 12px;font-family:"Spline Sans Mono",monospace;font-size:12.5px}
+  .aimsg.a{align-self:flex-start;color:var(--ink)} .aimsg.a .who{font-family:"Spline Sans Mono",monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--coral);margin-bottom:4px}
+  .aimsg .err{color:var(--coral);font-size:12.5px} .aimsg .cost{margin-top:6px;font-family:"Spline Sans Mono",monospace;font-size:9.5px;color:var(--faint)}
+  .typing{display:inline-flex;gap:4px} .typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:tp 1s infinite}
+  .typing span:nth-child(2){animation-delay:.15s} .typing span:nth-child(3){animation-delay:.3s} @keyframes tp{0%,60%,100%{opacity:.25}30%{opacity:1}}
+  .aichips{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 8px;flex:0 0 auto}
+  .aichips .chip{font-family:"Spline Sans Mono",monospace;font-size:10px;background:var(--deep);border:1px solid var(--line);color:var(--muted);border-radius:20px;padding:5px 10px;cursor:pointer;text-align:left}
+  .aichips .chip:hover{color:var(--ink);border-color:var(--coral)}
+  .aifoot{padding:9px 16px 14px;border-top:1px solid var(--line);flex:0 0 auto}
+  .aibtns{display:flex;gap:6px;margin-bottom:8px} .aibtns button{font-family:"Spline Sans Mono",monospace;font-size:10.5px;border:0;border-radius:7px;padding:6px 11px;cursor:pointer}
+  #aiSumm{background:var(--line);color:var(--ink)} #aiSumm:hover{background:#27566b}
+  .airow{display:flex;gap:8px;align-items:flex-end}
+  #aiText{flex:1;background:var(--deep);border:1px solid var(--line);border-radius:9px;color:var(--ink);font-family:"Inter",sans-serif;font-size:13px;padding:9px 11px;resize:none;max-height:120px}
+  #aiText:focus{outline:none;border-color:var(--coral)}
+  #aiSend{background:var(--coral);color:#1a0e06;font-weight:600;padding:9px 14px;border-radius:9px;border:0;cursor:pointer;font-family:"Spline Sans Mono",monospace;font-size:12px}
+</style></head>
+<body>
+<div class="backdrop" id="backdrop"></div>
+<div class="app">
+  <div class="topbar">
+    <h1>Sydney <span class="hl">seadragon</span> &amp; swell · 2022</h1>
+    <div class="seg" id="aggSeg"><button data-agg="peak" class="on">Peak hr</button><button data-agg="max">Max</button><button data-agg="mean">Mean</button><button data-agg="median">Median</button></div>
+    <button class="ask-btn" id="askBtn">✦ Ask the data</button>
+    <span id="status">Fetching hourly 2022 record…</span>
+    <span class="src" style="margin-left:auto">click a week → detail + orbits · ⤢ any graph to expand · scroll ↓ for table</span>
+  </div>
+  <div class="row1">
+    <div class="colL">
+      <div class="tile" id="tileTop">
+        <div class="th"><span>Strandings · wave · energy · orbital velocity</span><span class="thr"><span class="leg">orbital v = 16–27 m band</span><button class="exp" data-tile="tileTop">⤢ full</button></span></div>
+        <div class="flags" id="flags">
+          <button data-s="strand"><span class="dot" style="background:var(--coral)"></span>Stranded</button>
+          <button data-s="wave"><span class="dot" style="background:var(--wave)"></span>Wave ht</button>
+          <button data-s="energy"><span class="dot" style="background:var(--energy)"></span>Energy</button>
+          <button data-s="velPeak"><span class="dot" style="background:var(--orbit)"></span>Orbital v · peak</button>
+          <button data-s="velMed"><span class="dot dash" style="background:var(--orbit)"></span>Orbital v · median</button>
+        </div>
+        <div class="body"><svg id="chartTop"></svg></div>
+      </div>
+      <div class="tile" id="tileSwell">
+        <div class="th"><span>Swell direction &amp; period</span><span class="thr"><span class="leg"><i style="color:var(--period)">— s</i> · arrows from</span><button class="exp" data-tile="tileSwell">⤢ full</button></span></div>
+        <div class="body"><svg id="chartBot"></svg></div>
+      </div>
+      <div class="tile" id="tileWind">
+        <div class="th"><span>Wind &amp; implied fetch</span><span class="thr"><span class="leg"><i style="color:var(--wind)">— m/s</i> · <i style="color:#2f6e8c">bars km</i></span><button class="exp" data-tile="tileWind">⤢ full</button></span></div>
+        <div class="body"><svg id="chartWind"></svg></div>
+      </div>
+      <div class="tile" id="tileDetail">
+        <div class="th"><span class="dhead">Week detail <span class="wk" id="dWk"></span> <span class="meta" id="dMeta"></span></span><span class="thr"><span class="leg"><i style="color:var(--period)">— s</i> · <i style="color:var(--energy)">— kW/m</i></span><button class="exp" data-tile="tileDetail">⤢ full</button></span></div>
+        <div class="body"><svg id="chartDetail"></svg></div>
+      </div>
+    </div>
+    <div class="colR">
+      <div class="tile" id="tileLoc">
+        <div class="th"><span>Strandings by location</span><span class="thr"><span class="leg">Mar/Apr/May</span><button class="exp" data-tile="tileLoc">⤢ full</button></span></div>
+        <div class="body"><div class="locrow"><svg id="coast"></svg><svg id="chartLoc"></svg></div></div>
+      </div>
+      <div class="tile" id="tileOrbit">
+        <div class="th"><span>Orbital motion at habitat depth</span><span class="thr"><span class="leg"><i style="color:var(--orbit)">diam</i> · <i style="color:var(--wave)">vel</i></span><button class="exp" data-tile="tileOrbit">⤢ full</button></span></div>
+        <div class="orbctl">
+          <div class="sl" style="flex:0 0 auto"><label>Source</label><div class="seg sm" id="srcSeg"><button data-src="week" class="on">Week</button><button data-src="manual">Manual</button></div></div>
+          <div class="sl" id="hWrap"><label>Hs <span class="val" id="hVal"></span></label><input type="range" id="hRange" min="0.5" max="6" step="0.1" value="3"></div>
+          <div class="sl" id="tWrap"><label>T <span class="val" id="tVal"></span></label><input type="range" id="tRange" min="6" max="16" step="0.5" value="12"></div>
+          <div class="sl"><label>Depth <span class="val" id="dVal"></span></label><input type="range" id="dRange" min="2" max="27" step="0.5" value="22"></div>
+        </div>
+        <div class="orbcharts"><svg id="orbCol"></svg><svg id="orbProf"></svg></div>
+        <div class="readout" id="orbRead"></div>
+        <div class="verdict" id="orbVerdict"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="aiScrim"></div>
+<aside id="ai">
+  <div class="ahead"><span class="dot2"></span><h2>Ask the data</h2><button class="close" id="aiClose">✕</button></div>
+  <div id="aiMsgs"></div>
+  <div class="aichips" id="aiChips"></div>
+  <div class="aifoot">
+    <div class="aibtns"><button id="aiSumm">✦ Summarise</button></div>
+    <div class="airow"><textarea id="aiText" rows="1" placeholder="Ask about strandings, swell, energy or orbital motion…"></textarea><button id="aiSend">Send</button></div>
+  </div>
+</aside>
+<div class="scrollcue">↓ weekly summary &amp; methods</div>
+<div class="below">
+  <div class="belowgrid">
+  <div class="card"><h2>Weekly summary</h2>
+    <p class="mono" style="color:var(--faint);font-size:13px">Aggregation: <span id="aggName">peak hr</span>. Click a row to drive the dashboard.</p>
+    <div style="overflow-x:auto"><table id="tbl"><thead><tr><th>Week ending</th><th>Stranded</th><th>Wave ht (m)</th><th>Swell period (s)</th><th>Swell dir</th><th>Energy (kW/m)</th><th>Wind (m/s)</th><th>Fetch (km)</th></tr></thead><tbody></tbody></table></div>
+  </div>
+  <div class="card prose"><h2>Methods</h2>
+    <p><b>Wave height (Hs)</b> is the model significant wave height; only the weekly aggregation is mine. <b>Orbital velocity</b> on the strandings chart is the near-bed max orbital velocity u = (πH/T)/sinh(kd) in cm/s, drawn as a <b>band spanning the 16–27 m habitat depths</b> (top edge = 16 m, faster; lower edge = 27 m). The <i>peak</i> band uses storm-peak-hour swell; the <i>median</i> band uses the week's median swell.</p>
+    <p><b>Wave energy flux</b>: <span class="mono" style="color:var(--wave)">P ≈ 0.49·Hs²·T kW/m</span> (Te≈T proxy, slight over-estimate). <b>Fetch</b> (JONSWAP, from wind-sea): <span class="mono" style="color:var(--wave)">F = (U²/g)[g·Hm0/(0.0016·U²)]²</span>.</p>
+    <p><b>Orbital motion</b> (linear theory, bed at z=−d):</p>
+    <div class="formula">A=(H/2)cosh[k(z+d)]/sinh(kd)   u=(πH/T)cosh[k(z+d)]/sinh(kd)
+u_s=(H/2)²ωk cosh[2k(z+d)]/(2 sinh² kd)   (Stokes drift, net)</div>
+    <p class="small">Closed orbits give zero net transport; net along-swell push is the Stokes drift. Habitat is 16–27 m; the depth slider also reaches 2 m to model animals carried into the shallows, where orbital velocities rise sharply (linear theory becomes an upper bound there as waves shoal/break).</p>
+  </div>
+  </div>
+  <p class="foot"><b>Sources.</b> Strandings &amp; regions digitised from Booth, Trevor-Jones, Klanten &amp; Beretta (2025), <i>J. Fish Biol.</i> doi:10.1111/jfb.70019. Wave: Open-Meteo Marine; wind: Open-Meteo ERA5; ~33.8°S, 151.4°E, modelled. In-situ alternative: MHL Sydney Directional Waverider (WAVESYD), AODN THREDDS.</p>
+</div>
+<script>const STRAND=[["2022-02-01",0],["2022-02-08",0],["2022-02-15",0],["2022-02-22",0],
+  ["2022-03-01",0],["2022-03-08",2],["2022-03-15",10],["2022-03-22",28],
+  ["2022-04-01",6],["2022-04-08",84],["2022-04-15",25],["2022-04-22",22],
+  ["2022-05-01",8],["2022-05-08",3],["2022-05-15",1],["2022-05-22",0]];
+const REGIONS=[{name:"Central Coast",mar:0,apr:28,may:0,lat:-33.42},{name:"Sydney North",mar:8,apr:48,may:6,lat:-33.74},
+  {name:"Sydney South",mar:0,apr:12,may:4,lat:-34.04},{name:"Wollongong",mar:18,apr:48,may:5,lat:-34.42}];
+const LAT=-33.77,LON=151.43,G=9.81,HAB1=16,HAB2=27;
+const M_API="https://marine-api.open-meteo.com/v1/marine?latitude="+LAT+"&longitude="+LON+"&start_date=2022-01-25&end_date=2022-05-22&hourly=wave_height,wave_period,wind_wave_height,wind_wave_period,swell_wave_height,swell_wave_direction,swell_wave_period&timezone=Australia%2FSydney";
+const W_API="https://archive-api.open-meteo.com/v1/archive?latitude="+LAT+"&longitude="+LON+"&start_date=2022-01-25&end_date=2022-05-22&hourly=wind_speed_10m,wind_direction_10m&timezone=Australia%2FSydney&wind_speed_unit=ms";
+const COMPASS=["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+const compassOf=d=>COMPASS[Math.round(((d%360)+360)%360/22.5)%16];
+const fmt=(n,p=1)=>(n==null||isNaN(n)||!isFinite(n))?"–":Number(n).toFixed(p);
+const energyOf=(hs,t)=>(hs==null||t==null)?null:0.49*hs*hs*t;
+const labels=STRAND.map(([iso])=>new Date(iso+"T00:00:00").toLocaleDateString("en-AU",{day:"numeric",month:"short"}));
+const xs=(i,n,L,R)=>L+(R-L)*(i/(n-1));
+const circMean=a=>{let s=0,c=0;a.forEach(x=>{const r=x*Math.PI/180;s+=Math.sin(r);c+=Math.cos(r);});return (Math.atan2(s,c)*180/Math.PI+360)%360;};
+const median=a=>{const s=[...a].sort((x,y)=>x-y);return s[Math.floor(s.length/2)];};
+const niceMax=v=>{if(v<=0)return 10;const p=Math.pow(10,Math.floor(Math.log10(v)));const f=v/p;return (f<=1?1:f<=2?2:f<=5?5:10)*p;};
+const wavelength=(T,d)=>{let L=G*T*T/(2*Math.PI);for(let i=0;i<60;i++)L=G*T*T/(2*Math.PI)*Math.tanh(2*Math.PI*d/L);return L;};
+const bedVel=(H,T,d)=>{if(H==null||T==null)return null;const L=wavelength(T,d),k=2*Math.PI/L,sh=Math.sinh(k*d);return (Math.PI*H/T)/sh*100;}; // cm/s
+
+let WEEKS=[],MAXEN=200,selected=9,AGG="peak",SRC="week";
+const SERIES={strand:true,wave:true,energy:true,velPeak:true,velMed:true};
+
+async function load(){const status=document.getElementById("status");
+  try{const [mr,wr]=await Promise.all([fetch(M_API),fetch(W_API)]);
+    if(!mr.ok)throw new Error("marine HTTP "+mr.status);
+    const mj=await mr.json(),H=mj.hourly;let wind={};
+    if(wr.ok){const wj=await wr.json(),WH=wj.hourly;WH.time.forEach((t,i)=>wind[t]={U:WH.wind_speed_10m[i],wd:WH.wind_direction_10m[i]});}
+    const hrs=H.time.map((t,i)=>{const w=wind[t]||{};return{t,wh:H.wave_height[i],wp:H.wave_period[i],wwh:H.wind_wave_height[i],wwp:H.wind_wave_period[i],
+      swh:H.swell_wave_height[i],swd:H.swell_wave_direction[i],swp:H.swell_wave_period[i],U:w.U??null,wd:w.wd??null,E:energyOf(H.wave_height[i],H.wave_period[i])};});
+    WEEKS=STRAND.map(([iso,count])=>{const end=new Date(iso+"T23:59:59");
+      const win=hrs.filter(h=>{const d=new Date(h.t);return d<=end&&d>new Date(end.getTime()-7*864e5);});
+      let peak=null;win.forEach(h=>{if(h.E!=null&&(!peak||h.E>peak.E))peak=h;});return{iso,count,hours:win,peak};});
+    MAXEN=Math.max(50,Math.ceil(Math.max(...WEEKS.map(w=>val(w,"E","max")||0))/50)*50);
+    status.textContent="Live · Open-Meteo Marine + ERA5 · "+mj.latitude.toFixed(2)+"°, "+mj.longitude.toFixed(2)+"° · hourly"+(wr.ok?"":" · wind n/a");
+    redrawAll();showDetail(selected);
+  }catch(e){status.className="err";status.textContent="Couldn't reach Open-Meteo ("+e.message+"). Open this file directly in a browser.";
+    const b=document.createElement("button");b.textContent="Retry";b.className="retry";b.onclick=()=>{status.className="";status.textContent="Retrying…";b.remove();load();};status.after(b);}}
+
+function val(w,f,agg=AGG){const v=w.hours.map(h=>h[f]).filter(x=>x!=null);if(!v.length)return null;
+  if(agg==="peak")return w.peak?w.peak[f]:null;if(agg==="max")return Math.max(...v);
+  if(agg==="mean")return v.reduce((a,b)=>a+b,0)/v.length;if(agg==="median")return median(v);}
+function dirVal(w,f){if(AGG==="peak")return w.peak?w.peak[f]:null;const d=w.hours.map(h=>h[f]).filter(x=>x!=null);return d.length?circMean(d):null;}
+function fetchKm(w){const U=val(w,"U"),Hw=val(w,"wwh");if(!U||U<1||Hw==null)return null;return (U*U/G)*Math.pow((G*Hw)/(0.0016*U*U),2)/1000;}
+function swellHT(wk,mode){if(mode==="peak")return{H:wk.peak?wk.peak.swh:null,T:wk.peak?wk.peak.swp:null};
+  const hs=wk.hours.map(x=>x.swh).filter(v=>v!=null),ts=wk.hours.map(x=>x.swp).filter(v=>v!=null);return{H:hs.length?median(hs):null,T:ts.length?median(ts):null};}
+function velAt(wk,mode,dep){const {H,T}=swellHT(wk,mode);return bedVel(H,T,dep);}
+
+function dims(id){const el=document.getElementById(id);const r=el.getBoundingClientRect();
+  const w=Math.max(220,Math.round(r.width)),h=Math.max(110,Math.round(r.height));
+  el.setAttribute("viewBox",`0 0 ${w} ${h}`);el.setAttribute("preserveAspectRatio","none");return{el,w,h};}
+function redrawAll(){if(!WEEKS.length)return;drawTop();drawBot();drawWind();drawLoc();drawCoast();fillTable();drawOrbital();drawDetail(WEEKS[selected]);}
+function redrawOne(id){({tileTop:drawTop,tileSwell:drawBot,tileWind:drawWind,
+  tileLoc:()=>{drawLoc();drawCoast();},tileOrbit:drawOrbital,tileDetail:()=>drawDetail(WEEKS[selected])}[id]||(()=>{}))();}
+
+/* ---- strandings + flagged series, orbital velocity as 16–27 m band ---- */
+function drawTop(){const {el,w,h}=dims("chartTop");const n=WEEKS.length;
+  const right=[];if(SERIES.wave)right.push("wave");if(SERIES.energy)right.push("energy");if(SERIES.velPeak||SERIES.velMed)right.push("vel");
+  const L=40,T=14,B=h-40,R=Math.max(L+120,w-(8+38*right.length));
+  const yS=v=>B-(v/100)*(B-T),yW=v=>B-(v/8)*(B-T),yE=v=>B-(v/MAXEN)*(B-T);
+  const allV=[];WEEKS.forEach(wk=>{if(SERIES.velPeak){const v=velAt(wk,"peak",HAB1);if(v!=null)allV.push(v);}if(SERIES.velMed){const v=velAt(wk,"median",HAB1);if(v!=null)allV.push(v);}});
+  const MAXV=niceMax(allV.length?Math.max(...allV):10);const yV=v=>B-(Math.min(v,MAXV)/MAXV)*(B-T);
+  let s="";
+  for(let g=0;g<=100;g+=20){const y=yS(g);s+=gl(L,R,y);if(SERIES.strand)s+=ytx(L-6,y,g,"--coral");}
+  right.forEach((rs,j)=>{const ax=R+6+38*j;let unit,col,scale,mx;
+    if(rs==="wave"){unit="m";col="--wave";scale=yW;mx=8;}else if(rs==="energy"){unit="kW/m";col="--energy";scale=yE;mx=MAXEN;}else{unit="cm/s";col="--orbit";scale=yV;mx=MAXV;}
+    for(let g=0;g<=mx;g+=mx/4)s+=`<text x="${ax}" y="${scale(g)+4}" font-size="10" fill="var(${col})" font-family="Spline Sans Mono,monospace">${mx>=20?Math.round(g):g}</text>`;
+    s+=`<text x="${ax}" y="11" font-size="9" fill="var(${col})" font-family="Spline Sans Mono,monospace">${unit}</text>`;});
+  function band(mode,fill,dash){const pr=WEEKS.map((wk,i)=>{const a=velAt(wk,mode,HAB1),b=velAt(wk,mode,HAB2);
+      return(a!=null&&b!=null)?{x:xs(i,n,L+16,R-16),t:yV(a),b:yV(b)}:null;}).filter(Boolean);
+    if(pr.length<2)return"";
+    const poly=pr.map(p=>p.x.toFixed(1)+","+p.t.toFixed(1)).join(" ")+" "+pr.slice().reverse().map(p=>p.x.toFixed(1)+","+p.b.toFixed(1)).join(" ");
+    let str=`<polygon points="${poly}" fill="${fill}" stroke="none"/>`;
+    str+=`<polyline points="${pr.map(p=>p.x.toFixed(1)+","+p.t.toFixed(1)).join(" ")}" fill="none" stroke="var(--orbit)" stroke-width="2" ${dash?`stroke-dasharray="${dash}"`:""}/>`;
+    str+=`<polyline points="${pr.map(p=>p.x.toFixed(1)+","+p.b.toFixed(1)).join(" ")}" fill="none" stroke="var(--orbit)" stroke-width="1.1" opacity=".65" ${dash?`stroke-dasharray="${dash}"`:""}/>`;
+    return str;}
+  if(SERIES.velPeak)s+=band("peak","rgba(255,155,208,.20)",null);
+  if(SERIES.velMed)s+=band("median","rgba(255,155,208,.09)","5 4");
+  const slot=(R-16-(L+16))/(n-1),bw=Math.min(20,slot*0.7);
+  WEEKS.forEach((wk,i)=>{const x=xs(i,n,L+16,R-16);
+    s+=`<rect class="hit" data-week="${i}" x="${x-slot/2}" y="${T}" width="${slot}" height="${B-T}" fill="transparent"/>`;
+    if(i===selected)s+=`<rect x="${x-slot/2}" y="${T}" width="${slot}" height="${B-T}" fill="rgba(255,122,77,.10)" stroke="var(--coral)" stroke-dasharray="3 3" pointer-events="none"/>`;
+    if(SERIES.strand&&wk.count>0){const y=yS(wk.count);s+=`<rect class="hit" data-week="${i}" x="${x-bw/2}" y="${y}" width="${bw}" height="${B-y}" rx="2" fill="var(--coral)" opacity=".9"/>`;
+      s+=`<text x="${x}" y="${y-4}" text-anchor="middle" font-size="10" fill="var(--coral)" font-family="Spline Sans Mono,monospace" pointer-events="none">${wk.count}</text>`;}});
+  if(SERIES.wave)s+=line(WEEKS.map((wk,i)=>{const v=val(wk,"wh");return v!=null?[xs(i,n,L+16,R-16),yW(v)]:null;}),"var(--wave)");
+  if(SERIES.energy)s+=line(WEEKS.map((wk,i)=>{const v=val(wk,"E");return v!=null?[xs(i,n,L+16,R-16),yE(v)]:null;}),"var(--energy)");
+  WEEKS.forEach((wk,i)=>{const x=xs(i,n,L+16,R-16);s+=xlab(x,B+16,labels[i]);});
+  el.innerHTML=s;
+  el.onclick=ev=>{const t=ev.target.closest("[data-week]");if(t){selected=+t.dataset.week;drawTop();showDetail(selected);if(SRC==="week")drawOrbital();}};}
+
+function drawBot(){const {el,w,h}=dims("chartBot");const n=WEEKS.length;const L=40,T=12,B=h-44,R=w-12;
+  const ps=WEEKS.map(wk=>val(wk,"swp")).filter(v=>v!=null);const maxP=ps.length?Math.max(12,Math.ceil(Math.max(...ps))):14;const yP=v=>B-(v/maxP)*(B-T);
+  let s="";for(let g=0;g<=maxP;g+=Math.ceil(maxP/4)){const y=yP(g);s+=gl(L,R,y)+ytx(L-6,y,g,"--period");}
+  s+=line(WEEKS.map((wk,i)=>{const v=val(wk,"swp");return v!=null?[xs(i,n,L+12,R-12),yP(v)]:null;}),"var(--period)",true);
+  const ay=B+18;WEEKS.forEach((wk,i)=>{const x=xs(i,n,L+12,R-12),dir=dirVal(wk,"swd");
+    if(dir!=null)s+=arrow(x,ay,dir,10,"--period")+`<text x="${x}" y="${ay+20}" text-anchor="middle" font-size="9" fill="var(--faint)" font-family="Spline Sans Mono,monospace">${compassOf(dir)}</text>`;});
+  el.innerHTML=s;}
+
+function drawWind(){const {el,w,h}=dims("chartWind");const n=WEEKS.length;const L=40,T=14,B=h-46,R=w-40;
+  const us=WEEKS.map(wk=>val(wk,"U")).filter(v=>v!=null);const maxU=us.length?Math.max(12,Math.ceil(Math.max(...us))):20;
+  const fk=WEEKS.map(fetchKm).filter(v=>v!=null);const maxF=fk.length?Math.max(100,Math.ceil(Math.max(...fk)/100)*100):500;
+  const yU=v=>B-(v/maxU)*(B-T),yF=v=>B-(Math.min(v,maxF)/maxF)*(B-T);let s="";
+  for(let g=0;g<=maxU;g+=Math.ceil(maxU/4)){const y=yU(g);s+=gl(L,R,y)+ytx(L-6,y,g,"--wind");}
+  for(let g=0;g<=maxF;g+=maxF/4)s+=`<text x="${R+6}" y="${yF(g)+4}" font-size="10" fill="#2f6e8c" font-family="Spline Sans Mono,monospace">${g}</text>`;
+  s+=`<text x="${R+6}" y="11" font-size="9" fill="#2f6e8c" font-family="Spline Sans Mono,monospace">km</text>`;
+  const slot=(R-16-(L+16))/(n-1),bw=Math.min(15,slot*0.6);
+  WEEKS.forEach((wk,i)=>{const x=xs(i,n,L+16,R-16),f=fetchKm(wk);if(f!=null){const y=yF(f);s+=`<rect x="${x-bw/2}" y="${y}" width="${bw}" height="${B-y}" rx="2" fill="#2f6e8c" opacity=".7"/>`;}});
+  s+=line(WEEKS.map((wk,i)=>{const v=val(wk,"U");return v!=null?[xs(i,n,L+16,R-16),yU(v)]:null;}),"var(--wind)",true);
+  const ay=B+18;WEEKS.forEach((wk,i)=>{const x=xs(i,n,L+16,R-16),dir=dirVal(wk,"wd");
+    if(dir!=null)s+=arrow(x,ay,dir,9,"--wind")+`<text x="${x}" y="${ay+18}" text-anchor="middle" font-size="9" fill="var(--faint)" font-family="Spline Sans Mono,monospace">${compassOf(dir)}</text>`;
+    s+=xlab(x,B+44,labels[i]);});el.innerHTML=s;}
+
+function drawLoc(){const {el,w,h}=dims("chartLoc");const L=44,T=14,B=h-34,R=w-8,gw=(R-L)/REGIONS.length;
+  const maxV=60,yV=v=>B-(v/maxV)*(B-T);let s="";for(let g=0;g<=maxV;g+=20){const y=yV(g);s+=gl(L,R,y)+ytx(L-6,y,g,"--muted");}
+  const cols={mar:"#3a6e7d",apr:"var(--coral)",may:"#c08bff"};const bw=Math.min(18,gw/4);
+  REGIONS.forEach((rg,i)=>{const cx=L+gw/2+i*gw;[["mar",-1],["apr",0],["may",1]].forEach(([m,off])=>{const x=cx+off*bw,y=yV(rg[m]);
+    if(rg[m]>0){s+=`<rect x="${x-bw/2+1}" y="${y}" width="${bw-2}" height="${B-y}" rx="2" fill="${cols[m]}"/>`;s+=`<text x="${x}" y="${y-3}" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="Spline Sans Mono,monospace">${rg[m]}</text>`;}});
+    s+=`<text x="${cx}" y="${B+16}" text-anchor="middle" font-size="10" fill="var(--ink)">${rg.name}</text>`;});el.innerHTML=s;}
+function drawCoast(){const {el,w,h}=dims("coast");const x=w*0.42,top=18,bot=h-26;
+  const lats=REGIONS.map(r=>r.lat),la=Math.min(...lats)-0.12,lb=Math.max(...lats)+0.12;const yOf=l=>top+(bot-top)*((lb-l)/(lb-la));let s="";
+  s+=`<path d="M${x} ${top} C ${x+7} ${top+(bot-top)*.3}, ${x-7} ${top+(bot-top)*.6}, ${x+5} ${bot}" stroke="var(--line)" stroke-width="2" fill="none"/>`;
+  s+=`<text x="${x-3}" y="${top-5}" text-anchor="middle" font-size="9" fill="var(--faint)" font-family="Spline Sans Mono,monospace">N</text>`;
+  REGIONS.forEach(rg=>{const y=yOf(rg.lat),tot=rg.mar+rg.apr+rg.may,r=5+tot*0.42;
+    s+=`<circle cx="${x}" cy="${y}" r="${r}" fill="var(--coral)" opacity=".32"/><circle cx="${x}" cy="${y}" r="2.5" fill="var(--coral)"/>`;
+    s+=`<text x="${x+r+6}" y="${y-1}" font-size="9.5" fill="var(--ink)">${rg.name}</text><text x="${x+r+6}" y="${y+11}" font-size="8.5" fill="var(--faint)" font-family="Spline Sans Mono,monospace">${tot}</text>`;});el.innerHTML=s;}
+
+function showDetail(i){const w=WEEKS[i];if(!w)return;document.getElementById("dWk").textContent=labels[i];
+  const pk=w.peak?new Date(w.peak.t):null;
+  document.getElementById("dMeta").textContent=`${w.count} stranded · peak ${fmt(w.peak?w.peak.E:null)} kW/m`+(pk?` ${pk.toLocaleString("en-AU",{weekday:"short",hour:"numeric",hour12:true})}`:"")+` · swell ${fmt(w.peak?w.peak.swp:null)}s ${w.peak&&w.peak.swd!=null?compassOf(w.peak.swd):"–"}`;
+  drawDetail(w);document.querySelectorAll("#tbl tbody tr").forEach((tr,k)=>tr.classList.toggle("sel",k===i));}
+function drawDetail(wk){const {el,w,h}=dims("chartDetail");if(!wk||!wk.hours.length){el.innerHTML="";return;}
+  const L=40,T=12,B=h-30,R=w-40;const t0=new Date(wk.hours[0].t).getTime(),t1=new Date(wk.hours[wk.hours.length-1].t).getTime();
+  const X=t=>L+(R-L)*((new Date(t).getTime()-t0)/(t1-t0||1));
+  const maxP=Math.max(12,Math.ceil(Math.max(...wk.hours.map(h2=>h2.swp||0))));const yP=v=>B-(v/maxP)*(B-T),yE=v=>B-(v/MAXEN)*(B-T);let s="";
+  for(let g=0;g<=maxP;g+=Math.ceil(maxP/4)){const y=yP(g);s+=gl(L,R,y)+ytx(L-6,y,g,"--period");}
+  for(let g=0;g<=MAXEN;g+=MAXEN/4)s+=`<text x="${R+6}" y="${yE(g)+4}" font-size="9" fill="var(--energy)" font-family="Spline Sans Mono,monospace">${g}</text>`;
+  const eP=wk.hours.map(h2=>h2.E!=null?[X(h2.t),yE(h2.E)]:null).filter(Boolean);
+  if(eP.length>1){s+=`<polygon points="${eP[0][0]},${B} ${eP.map(p=>p.join(",")).join(" ")} ${eP[eP.length-1][0]},${B}" fill="var(--energy)" opacity=".10"/>`;s+=`<polyline fill="none" stroke="var(--energy)" stroke-width="1.8" points="${eP.map(p=>p.join(",")).join(" ")}"/>`;}
+  const pP=wk.hours.map(h2=>h2.swp!=null?[X(h2.t),yP(h2.swp)]:null).filter(Boolean);
+  if(pP.length>1)s+=`<polyline fill="none" stroke="var(--period)" stroke-width="2" points="${pP.map(p=>p.join(",")).join(" ")}"/>`;
+  const ay=B+16;wk.hours.forEach(h2=>{const d=new Date(h2.t);if(d.getHours()%6===0&&h2.swd!=null)s+=arrow(X(h2.t),ay,h2.swd,7,"--period");});
+  let last=null;wk.hours.forEach(h2=>{const d=new Date(h2.t),day=d.toISOString().slice(0,10);
+    if(day!==last&&d.getHours()<=1){last=day;const x=X(h2.t);s+=`<line x1="${x}" y1="${T}" x2="${x}" y2="${B}" stroke="var(--grid)" stroke-dasharray="2 4"/>`;
+      s+=`<text x="${x}" y="${B+27}" text-anchor="middle" font-size="9" fill="var(--faint)" font-family="Spline Sans Mono,monospace">${d.toLocaleDateString("en-AU",{weekday:"short",day:"numeric"})}</text>`;}});el.innerHTML=s;}
+
+function fillTable(){const tb=document.querySelector("#tbl tbody");
+  tb.innerHTML=WEEKS.map((wk,i)=>{const dir=dirVal(wk,"swd");
+    return `<tr class="clk ${i===selected?'sel':''}" data-week="${i}"><td>${labels[i]}</td><td>${wk.count}</td><td>${fmt(val(wk,"wh"))}</td><td>${fmt(val(wk,"swp"))}</td><td class="dir">${dir!=null?Math.round(dir)+"° <span class='compass'>"+compassOf(dir)+"</span>":"–"}</td><td class="en">${fmt(val(wk,"E"))}</td><td class="wd">${fmt(val(wk,"U"))}</td><td>${fmt(fetchKm(wk),0)}</td></tr>`;}).join("");
+  tb.querySelectorAll("tr").forEach(tr=>tr.onclick=()=>{selected=+tr.dataset.week;drawTop();showDetail(selected);if(SRC==="week")drawOrbital();});}
+
+function getHT(){if(SRC==="manual")return{H:+document.getElementById("hRange").value,T:+document.getElementById("tRange").value};
+  const w=WEEKS[selected]||WEEKS[9];return{H:val(w,"swh")??val(w,"wh")??3,T:val(w,"swp")??12};}
+function drawOrbital(){if(!WEEKS.length)return;const {H,T}=getHT(),d=+document.getElementById("dRange").value;
+  document.getElementById("hVal").textContent=fmt(H)+"m";document.getElementById("tVal").textContent=fmt(T)+"s";document.getElementById("dVal").textContent=fmt(d)+"m";
+  document.getElementById("hWrap").style.opacity=SRC==="manual"?1:.4;document.getElementById("tWrap").style.opacity=SRC==="manual"?1:.4;
+  const L=wavelength(T,d),k=2*Math.PI/L,w2=2*Math.PI/T,sh=Math.sinh(k*d);
+  const A=hh=>(H/2)*Math.cosh(k*(d-hh))/sh,Bv=hh=>(H/2)*Math.sinh(k*(d-hh))/sh,U=hh=>(Math.PI*H/T)*Math.cosh(k*(d-hh))/sh,Us=hh=>Math.pow(H/2,2)*w2*k*Math.cosh(2*k*(d-hh))/(2*sh*sh);
+  const aBed=A(d),uBed=U(d),usBed=Us(d),dL=d/L;
+  (function(){const {el,w,h}=dims("orbCol");const cx=w*0.46,top=22,bed=h-26;const yOf=hh=>top+(bed-top)*(hh/d);
+    const maxA=A(0),sc=Math.min((w*0.34)/(maxA||1),(bed-top)/(d||1)*0.9);let s="";
+    const hb1=Math.min(HAB1,d),hb2=Math.min(HAB2,d);
+    s+=`<rect x="6" y="${yOf(hb1)}" width="${w-12}" height="${yOf(hb2)-yOf(hb1)}" fill="rgba(255,155,208,.10)"/>`;
+    let surf="M6 "+top;for(let xx=6;xx<=w-6;xx+=8)surf+=` L${xx} ${(top+3*Math.sin(xx/12)).toFixed(1)}`;
+    s+=`<path d="${surf}" stroke="var(--wave)" stroke-width="1.3" fill="none" opacity=".55"/>`;
+    s+=`<line x1="${cx}" y1="${top}" x2="${cx}" y2="${bed}" stroke="var(--grid)"/><line x1="6" y1="${bed}" x2="${w-6}" y2="${bed}" stroke="var(--line)" stroke-width="2"/>`;
+    s+=`<text x="9" y="${bed-5}" font-size="8.5" fill="var(--faint)" font-family="Spline Sans Mono,monospace">bed ${fmt(d)}m</text>`;
+    [0,d*0.33,d*0.66,d].forEach(hh=>{const cy=yOf(hh),rx=Math.max(1,A(hh)*sc),ry=Math.max(.5,Bv(hh)*sc);
+      s+=`<ellipse cx="${cx}" cy="${cy}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="none" stroke="var(--orbit)" stroke-width="1.5"/><text x="${cx+rx+6}" y="${cy+3}" font-size="8.5" fill="var(--faint)" font-family="Spline Sans Mono,monospace">${fmt(hh)}m</text>`;});
+    s+=`<text x="${cx}" y="12" text-anchor="middle" font-size="9.5" fill="var(--muted)" font-family="Spline Sans Mono,monospace">orbit vs depth</text>`;el.innerHTML=s;})();
+  (function(){const {el,w,h}=dims("orbProf");const Lx=46,Rx=w-14,T2=22,B2=h-22;const yOf=hh=>T2+(B2-T2)*(hh/d);
+    const maxD=Math.max(2*A(0),.5),maxV=Math.max(U(0),.1),xD=v=>Lx+(Rx-Lx)*(v/maxD),xV=v=>Lx+(Rx-Lx)*(v/maxV);let s="";
+    const hb1=Math.min(HAB1,d),hb2=Math.min(HAB2,d);
+    s+=`<rect x="${Lx}" y="${yOf(hb1)}" width="${Rx-Lx}" height="${yOf(hb2)-yOf(hb1)}" fill="rgba(255,155,208,.10)"/>`;
+    for(let hh=0;hh<=d+.01;hh+=d/4){const y=yOf(hh);s+=gl(Lx,Rx,y)+`<text x="${Lx-6}" y="${y+4}" text-anchor="end" font-size="9" fill="var(--faint)" font-family="Spline Sans Mono,monospace">${fmt(hh)}</text>`;}
+    let pd="",pv="";for(let hh=0;hh<=d;hh+=d/40){pd+=(pd?" L":"M")+xD(2*A(hh)).toFixed(1)+" "+yOf(hh).toFixed(1);pv+=(pv?" L":"M")+xV(U(hh)).toFixed(1)+" "+yOf(hh).toFixed(1);}
+    s+=`<path d="${pd}" stroke="var(--orbit)" stroke-width="2.2" fill="none"/><path d="${pv}" stroke="var(--wave)" stroke-width="2.2" fill="none"/>`;
+    s+=`<circle cx="${xD(2*A(d))}" cy="${yOf(d)}" r="3" fill="var(--orbit)"/><circle cx="${xV(U(d))}" cy="${yOf(d)}" r="3" fill="var(--wave)"/>`;
+    s+=`<text x="${Lx}" y="14" font-size="9" fill="var(--orbit)">diam→ ${fmt(maxD)}m</text><text x="${Rx}" y="14" text-anchor="end" font-size="9" fill="var(--wave)">←vel ${fmt(maxV)}m/s</text>`;
+    s+=`<text x="14" y="${(T2+B2)/2}" text-anchor="middle" font-size="9" fill="var(--muted)" transform="rotate(-90 14 ${(T2+B2)/2})">depth m</text>`;el.innerHTML=s;})();
+  document.getElementById("orbRead").innerHTML=[["Wavelength",fmt(L,0),"m"],["Regime",dL<0.05?"shallow":dL<0.5?"intermed.":"deep",`d/L ${fmt(dL,3)}`],["Bed velocity",fmt(uBed*100,0),"cm/s"],["Stokes drift",fmt(usBed*100,1),"cm/s"]]
+    .map(([k,v,u])=>`<div><div class="k">${k}</div><div class="v">${v} <small>${u}</small></div></div>`).join("");
+  const fast=uBed>0.3,nd=dirVal(WEEKS[selected]||WEEKS[9],"swd");
+  document.getElementById("orbVerdict").innerHTML=`<b>${dL<0.5?"Intermediate-depth":"Deep-water"}</b> — motion ${dL<0.5?"reaches the bed":"decays first"}: ~<b>${fmt(2*aBed)}m</b> surge at <b>${fmt(uBed*100,0)} cm/s</b>${fast?", beyond a seadragon's swimming once kelp is stripped":""}. Closed orbits carry nothing, but <b>Stokes drift ${fmt(usBed*100,1)} cm/s</b> pushes ${nd!=null?"toward <b>"+compassOf((nd+180)%360)+"</b>":"along swell"} — shoreward.`;}
+
+function gl(L,R,y){return `<line x1="${L}" y1="${y}" x2="${R}" y2="${y}" stroke="var(--grid)"/>`;}
+function ytx(x,y,t,c){return `<text x="${x}" y="${y+4}" text-anchor="end" font-size="10" fill="var(${c})" font-family="Spline Sans Mono,monospace">${t}</text>`;}
+function xlab(x,y,t){return `<text x="${x}" y="${y}" text-anchor="middle" font-size="9" fill="var(--faint)" font-family="Spline Sans Mono,monospace" transform="rotate(32 ${x} ${y})" pointer-events="none">${t}</text>`;}
+function line(pts,color,dots,dash){const p=pts.filter(Boolean);if(p.length<2)return"";
+  let s=`<polyline fill="none" stroke="${color}" stroke-width="2.2" stroke-linejoin="round" ${dash?`stroke-dasharray="${dash}"`:""} points="${p.map(q=>q.join(",")).join(" ")}"/>`;
+  if(dots)p.forEach(q=>s+=`<circle cx="${q[0]}" cy="${q[1]}" r="2.6" fill="${color}"/>`);return s;}
+function arrow(cx,cy,fromDir,len,col){const tr=(fromDir+180)%360,rad=(tr-90)*Math.PI/180;
+  const tx=cx+len*Math.cos(rad),ty=cy+len*Math.sin(rad),bx=cx-len*Math.cos(rad),by=cy-len*Math.sin(rad),a1=rad+Math.PI*0.82,a2=rad-Math.PI*0.82,hl=5;
+  return `<line x1="${bx.toFixed(1)}" y1="${by.toFixed(1)}" x2="${tx.toFixed(1)}" y2="${ty.toFixed(1)}" stroke="var(${col})" stroke-width="1.8"/><path d="M${tx.toFixed(1)},${ty.toFixed(1)} L${(tx+hl*Math.cos(a1)).toFixed(1)},${(ty+hl*Math.sin(a1)).toFixed(1)} M${tx.toFixed(1)},${ty.toFixed(1)} L${(tx+hl*Math.cos(a2)).toFixed(1)},${(ty+hl*Math.sin(a2)).toFixed(1)}" stroke="var(${col})" stroke-width="1.8" fill="none"/>`;}
+
+/* ---- fullscreen ---- */
+function toggleFull(id){const t=document.getElementById(id),bd=document.getElementById("backdrop");
+  const willFull=!t.classList.contains("full");
+  document.querySelectorAll(".tile.full").forEach(x=>x.classList.remove("full"));
+  document.querySelectorAll(".exp").forEach(b=>b.textContent="⤢ full");
+  if(willFull){t.classList.add("full");const e=t.querySelector(".exp");if(e)e.textContent="✕ back";}
+  bd.classList.toggle("on",willFull);document.documentElement.style.overflow=willFull?"hidden":"";
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{if(willFull)redrawOne(id);else{redrawAll();showDetail(selected);}}));}
+
+/* ---- wiring ---- */
+document.getElementById("aggSeg").onclick=ev=>{const b=ev.target.closest("button");if(!b)return;AGG=b.dataset.agg;
+  document.querySelectorAll("#aggSeg button").forEach(x=>x.classList.toggle("on",x===b));document.getElementById("aggName").textContent=b.textContent.toLowerCase();redrawAll();showDetail(selected);};
+document.getElementById("flags").onclick=ev=>{const b=ev.target.closest("button");if(!b)return;SERIES[b.dataset.s]=!SERIES[b.dataset.s];b.classList.toggle("off",!SERIES[b.dataset.s]);drawTop();};
+document.getElementById("srcSeg").onclick=ev=>{const b=ev.target.closest("button");if(!b)return;SRC=b.dataset.src;
+  document.querySelectorAll("#srcSeg button").forEach(x=>x.classList.toggle("on",x===b));drawOrbital();};
+document.getElementById("dRange").oninput=drawOrbital;document.getElementById("hRange").oninput=drawOrbital;document.getElementById("tRange").oninput=drawOrbital;
+document.querySelectorAll(".exp").forEach(b=>b.onclick=e=>{e.stopPropagation();toggleFull(b.dataset.tile);});
+document.getElementById("backdrop").onclick=()=>{document.querySelectorAll(".tile.full").forEach(x=>x.classList.remove("full"));
+  document.querySelectorAll(".exp").forEach(b=>b.textContent="⤢ full");document.getElementById("backdrop").classList.remove("on");document.documentElement.style.overflow="";
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{redrawAll();showDetail(selected);}));};
+let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{redrawAll();showDetail(selected);},150);});
+
+/* ---------- Ask the data (Anthropic via Worker proxy — reuses existing key) ---------- */
+const AI_ENDPOINT="https://hidden-grass-8d45.sticasale.workers.dev";
+const USD_TO_AUD=1.58,P_IN=3/1e6*USD_TO_AUD,P_OUT=15/1e6*USD_TO_AUD;
+let aiHistory=[],aiSpent=0;
+const AI_SYS=`You are a marine-physics and ecology data analyst embedded in an interactive dashboard of the April-May 2022 weedy seadragon (Phyllopteryx taeniolatus) mass stranding on Sydney beaches (Booth, Trevor-Jones, Klanten & Beretta 2025, Journal of Fish Biology). ~190 animals washed up Feb-May 2022, peaking the week ending 8 April.
+
+Answer ONLY from the JSON provided in each message. Never invent numbers. If the data cannot answer something, say so. Be concise and specific, short paragraphs, **bold** key figures. A few sentences unless asked for depth.
+
+Provenance and interpretation rules you MUST apply and surface when relevant:
+- Strandings are digitised from the paper's Figure 1: approximate weekly counts, not exact.
+- Wave height, swell, wind and energy are an Open-Meteo numerical MODEL hindcast at ~33.8S,151.4E, NOT in-situ buoy measurements. Always treat them as modelled; the in-situ source would be the MHL Sydney Directional Waverider.
+- Wave energy flux P=0.49*Hs^2*T kW/m uses peak period as an energy-period proxy, so it slightly OVER-estimates (true Te=0.86*T).
+- "Implied fetch" is back-calculated from wind-sea via JONSWAP. When it runs to thousands of km the local wind could NOT have built that sea: it is long-period SWELL from a distant east-coast low, which drives the deep orbital motion.
+- Orbital velocity is the near-bed max orbital velocity from linear wave theory, given as a BAND across the 16-27 m seadragon habitat depths (cm/s; the 16 m edge is faster).
+- Mechanism: closed wave orbits give ZERO net transport; the net along-swell (shoreward) push is the second-order Stokes drift. At 16-27 m under 12-14 s swell the water is intermediate-depth, so the orbital surge reaches the seabed. Seadragons are negatively buoyant, weak swimmers, so strong near-bed surge once kelp is stripped, plus Stokes drift, plausibly displaces them shoreward.
+- Distinguish real signal from modelling caveats. The dashboard correlates conditions with strandings; it does not prove mechanism. Do not overclaim causation.`;
+const aiR=(v,p=1)=>(v==null||isNaN(v)||!isFinite(v))?null:+(+v).toFixed(p);
+function aiProfile(){const d=+document.getElementById("dRange").value;const ht=getHT();
+  return {context:"2022 Sydney weedy seadragon strandings vs modelled wave/swell/wind/energy and near-bed orbital motion",
+    aggregation_mode:AGG,selected_week:labels[selected],habitat_band_m:[16,27],total_stranded:WEEKS.reduce((a,w)=>a+w.count,0),
+    weeks:WEEKS.map((wk,i)=>{const dir=dirVal(wk,"swd");return{week_ending:labels[i],stranded:wk.count,wave_height_m:aiR(val(wk,"wh")),
+      swell_period_s:aiR(val(wk,"swp")),swell_dir_deg:aiR(dir,0),swell_from:dir!=null?compassOf(dir):null,energy_kW_per_m:aiR(val(wk,"E"),0),
+      wind_ms:aiR(val(wk,"U")),implied_fetch_km:aiR(fetchKm(wk),0),
+      orbVel_cmps_peak_16and27:[aiR(velAt(wk,"peak",16),0),aiR(velAt(wk,"peak",27),0)],
+      orbVel_cmps_median_16and27:[aiR(velAt(wk,"median",16),0),aiR(velAt(wk,"median",27),0)]};}),
+    regions:REGIONS.map(r=>({name:r.name,mar:r.mar,apr:r.apr,may:r.may,total:r.mar+r.apr+r.may})),
+    orbital_panel:{source:SRC,Hs_m:aiR(ht.H),period_s:aiR(ht.T),depth_m:d}};}
+const aiEl=id=>document.getElementById(id);
+function aiOpen(){aiEl("ai").classList.add("open");aiEl("aiScrim").classList.add("open");if(!aiHistory.length)aiGreet();aiEl("aiText").focus();}
+function aiClose(){aiEl("ai").classList.remove("open");aiEl("aiScrim").classList.remove("open");}
+function aiGreet(){aiAddA(`<p>I can read the live numbers behind whatever the dashboard is showing. Pick a week, an aggregation or a depth and ask away. Try a chip, or hit <strong>Summarise</strong>.</p>`);}
+function aiAddU(t){const d=document.createElement("div");d.className="aimsg u";d.textContent=t;aiEl("aiMsgs").appendChild(d);aiEl("aiMsgs").scrollTop=1e9;}
+function aiAddA(html){const d=document.createElement("div");d.className="aimsg a";d.innerHTML=`<div class="who">Analyst</div>${html}`;aiEl("aiMsgs").appendChild(d);aiEl("aiMsgs").scrollTop=1e9;return d;}
+function aiTyping(){const d=document.createElement("div");d.className="aimsg a";d.innerHTML=`<div class="who">Analyst</div><div class="typing"><span></span><span></span><span></span></div>`;aiEl("aiMsgs").appendChild(d);aiEl("aiMsgs").scrollTop=1e9;return d;}
+function aiFmt(t){return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").split(/\n\n+/).map(p=>`<p>${p.replace(/\n/g,"<br>")}</p>`).join("");}
+function aiMoney(x){return x>=0.01?"A$"+x.toFixed(2):"A$"+x.toFixed(4);}
+async function aiAsk(q){aiAddU(q);aiHistory.push({role:"user",content:q});const t=aiTyping();
+  const userMsg=`Current dashboard JSON:\n${JSON.stringify(aiProfile())}\n\nQuestion: ${q}`;
+  const apiMsgs=aiHistory.slice(0,-1).concat([{role:"user",content:userMsg}]);
+  try{const res=await fetch(AI_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:AI_SYS,messages:apiMsgs})});
+    const data=await res.json();t.remove();
+    if(res.status===429){aiAddA(`<div class="err">Rate limit. Wait a moment and retry.</div>`);return;}
+    const text=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
+    if(text){const el=aiAddA(aiFmt(text));aiHistory.push({role:"assistant",content:text});const u=data.usage;
+      if(u){const c=(u.input_tokens||0)*P_IN+(u.output_tokens||0)*P_OUT;aiSpent+=c;
+        el.insertAdjacentHTML("beforeend",`<div class="cost">${aiMoney(c)} this answer \u00b7 ${aiMoney(aiSpent)} session \u00b7 ${u.input_tokens||0} in / ${u.output_tokens||0} out</div>`);}}
+    else aiAddA(`<div class="err">No response. Try rephrasing.</div>`);
+  }catch(e){t.remove();aiAddA(`<div class="err">Couldn't reach the assistant (${e.message}). Check the Worker endpoint is deployed and allows this origin.</div>`);}}
+function aiSummarise(){aiAsk("Summarise what the dashboard currently shows: how the strandings line up with wave energy, swell period and direction, and the near-bed orbital velocity band, and flag anything that is a modelling caveat rather than a real signal.");}
+const AI_CHIPS=["Does swell energy explain the April peak?","Is 16-27 m orbital velocity enough to displace a seadragon?","Which region was worst hit, and is that effort or impact?","What here is modelled vs measured?","Why does implied fetch blow out in early April?"];
+aiEl("askBtn").onclick=aiOpen;aiEl("aiClose").onclick=aiClose;aiEl("aiScrim").onclick=aiClose;aiEl("aiSumm").onclick=aiSummarise;
+(function(){const c=aiEl("aiChips");AI_CHIPS.forEach(x=>{const b=document.createElement("button");b.className="chip";b.textContent=x;b.onclick=()=>aiAsk(x);c.appendChild(b);});})();
+(function(){const ta=aiEl("aiText");aiEl("aiSend").onclick=()=>{const v=ta.value.trim();if(!v)return;ta.value="";aiAsk(v);};
+  ta.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();aiEl("aiSend").click();}});})();
+
+load();
+</script>
+</body></html>
