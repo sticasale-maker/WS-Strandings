@@ -100,8 +100,8 @@
   .aifoot{padding:9px 16px 14px;border-top:1px solid var(--line);flex:0 0 auto}
   .aibtns{display:flex;gap:6px;margin-bottom:8px} .aibtns button{font-family:"Spline Sans Mono",monospace;font-size:10.5px;border:0;border-radius:7px;padding:6px 11px;cursor:pointer}
   #aiSumm{background:var(--line);color:var(--ink)} #aiSumm:hover{background:#27566b}
-  .airow{display:flex;gap:8px;align-items:flex-end}
-  #aiText{flex:1;background:var(--deep);border:1px solid var(--line);border-radius:9px;color:var(--ink);font-family:"Inter",sans-serif;font-size:13px;padding:9px 11px;resize:none;max-height:120px}
+  .airow{display:flex;gap:8px;align-items:stretch} .airow #aiSend{align-self:stretch;min-width:64px}
+  #aiText{flex:1;background:var(--deep);border:1px solid var(--line);border-radius:10px;color:var(--ink);font-family:"Inter",sans-serif;font-size:15px;line-height:1.55;padding:13px 14px;resize:vertical;min-height:160px;max-height:50vh}
   #aiText:focus{outline:none;border-color:var(--coral)}
   #aiSend{background:var(--coral);color:#1a0e06;font-weight:600;padding:9px 14px;border-radius:9px;border:0;cursor:pointer;font-family:"Spline Sans Mono",monospace;font-size:12px}
 </style></head>
@@ -168,7 +168,7 @@
   <div class="aichips" id="aiChips"></div>
   <div class="aifoot">
     <div class="aibtns"><button id="aiSumm">✦ Summarise</button></div>
-    <div class="airow"><textarea id="aiText" rows="1" placeholder="Ask about strandings, swell, energy or orbital motion…"></textarea><button id="aiSend">Send</button></div>
+    <div class="airow"><textarea id="aiText" rows="6" placeholder="Ask about strandings, swell, energy or orbital motion…"></textarea><button id="aiSend">Send</button></div>
   </div>
 </aside>
 <div class="scrollcue">↓ weekly summary &amp; methods</div>
