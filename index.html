@@ -23,7 +23,8 @@
   .body{flex:1 1 auto;min-height:0;position:relative} svg{display:block;width:100%;height:100%}
   .topbar{display:flex;align-items:center;gap:13px;flex-wrap:wrap;flex:0 0 auto}
   .topbar h1{font-family:"Bebas Neue",Impact,sans-serif;font-weight:400;font-size:25px;line-height:1;margin:0;letter-spacing:.01em}
-  .topbar h1 .hl{color:var(--coral)} .topbar .src{font-family:"Spline Sans Mono",monospace;font-size:10.5px;color:var(--faint)}
+  .topbar h1 .hl{color:var(--coral)}
+  .byline{font-family:"Spline Sans Mono",monospace;font-size:10.5px;letter-spacing:.06em;color:var(--faint);align-self:center;border-left:1px solid var(--line);padding-left:11px} .topbar .src{font-family:"Spline Sans Mono",monospace;font-size:10.5px;color:var(--faint)}
   #status{font-family:"Spline Sans Mono",monospace;font-size:10.5px;color:var(--period)} #status.err{color:var(--coral)}
   .seg{display:inline-flex;background:var(--deep);border:1px solid var(--line);border-radius:8px;overflow:hidden}
   .seg button{font-family:"Spline Sans Mono",monospace;font-size:10.5px;background:transparent;color:var(--muted);border:0;padding:6px 10px;cursor:pointer}
@@ -61,10 +62,10 @@
     svg{height:100%} .tile.full svg{height:100%}
   }
   .scrollcue{text-align:center;color:var(--faint);font-family:"Spline Sans Mono",monospace;font-size:10.5px;padding:5px 0 0}
-  .below{padding:24px 16px 40px;max-width:1020px;margin:0 auto}
+  .below{padding:24px 22px 40px;max-width:none;margin:0}
   .below h2{font-family:"Spline Sans Mono",monospace;font-weight:500;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
   .below .card{background:linear-gradient(180deg,var(--panel),var(--deep));border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:18px}
-  .belowgrid{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap} .belowgrid>.card{flex:1 1 400px;min-width:0;margin-bottom:18px}
+  .belowgrid{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap} .belowgrid>.card{flex:1 1 480px;min-width:0;margin-bottom:18px}
   table{width:100%;border-collapse:collapse;font-size:13px} th,td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--grid)}
   th:first-child,td:first-child{text-align:left} th{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
   td{font-family:"Spline Sans Mono",monospace} td.dir{color:var(--period)} td.en{color:var(--energy)} td.wd{color:var(--wind)}
@@ -79,10 +80,11 @@
   .ask-btn:hover{filter:brightness(1.08)}
   #aiScrim{position:fixed;inset:0;background:rgba(5,17,23,.6);z-index:1100;opacity:0;pointer-events:none;transition:opacity .2s}
   #aiScrim.open{opacity:1;pointer-events:auto}
-  #ai{position:fixed;top:0;right:0;height:100vh;width:min(420px,92vw);z-index:1200;display:flex;flex-direction:column;
+  #ai{position:fixed;top:0;right:0;height:100vh;width:50vw;z-index:1200;display:flex;flex-direction:column;
     background:linear-gradient(180deg,var(--panel),var(--deep));border-left:1px solid var(--line);transform:translateX(100%);
     transition:transform .24s ease;box-shadow:-20px 0 60px rgba(0,0,0,.45)}
   #ai.open{transform:none}
+  @media(max-width:760px){#ai{width:94vw}}
   .ahead{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);flex:0 0 auto}
   .ahead .dot2{width:9px;height:9px;border-radius:50%;background:var(--coral);box-shadow:0 0 10px var(--coral)}
   .ahead h2{font-family:"Bebas Neue",Impact,sans-serif;font-weight:400;font-size:20px;margin:0;letter-spacing:.02em;flex:1}
@@ -104,12 +106,17 @@
   #aiText{flex:1;background:var(--deep);border:1px solid var(--line);border-radius:10px;color:var(--ink);font-family:"Inter",sans-serif;font-size:15px;line-height:1.55;padding:13px 14px;resize:vertical;min-height:160px;max-height:50vh}
   #aiText:focus{outline:none;border-color:var(--coral)}
   #aiSend{background:var(--coral);color:#1a0e06;font-weight:600;padding:9px 14px;border-radius:9px;border:0;cursor:pointer;font-family:"Spline Sans Mono",monospace;font-size:12px}
+  .shorewrap{flex:0 0 176px;display:flex;flex-direction:column;margin-top:8px}
+  .shorewrap .th2{font-family:"Spline Sans Mono",monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+  .shorewrap .th2 .leg2{color:var(--faint);font-size:9px;text-transform:none;letter-spacing:.02em}
+  .shorewrap .body2{flex:1;min-height:0}
 </style></head>
 <body>
 <div class="backdrop" id="backdrop"></div>
 <div class="app">
   <div class="topbar">
     <h1>Sydney <span class="hl">seadragon</span> &amp; swell · 2022</h1>
+    <span class="byline">Dashboard by Marco Bordieri</span>
     <div class="seg" id="aggSeg"><button data-agg="peak" class="on">Peak hr</button><button data-agg="max">Max</button><button data-agg="mean">Mean</button><button data-agg="median">Median</button></div>
     <button class="ask-btn" id="askBtn">✦ Ask the data</button>
     <span id="status">Fetching hourly 2022 record…</span>
@@ -118,13 +125,13 @@
   <div class="row1">
     <div class="colL">
       <div class="tile" id="tileTop">
-        <div class="th"><span>Strandings · wave · energy · orbital velocity</span><span class="thr"><span class="leg">orbital v = 16–27 m band</span><button class="exp" data-tile="tileTop">⤢ full</button></span></div>
+        <div class="th"><span>Strandings · wave · energy · orbital velocity</span><span class="thr"><span class="leg">Stokes drift (m/min) = 16–27 m band</span><button class="exp" data-tile="tileTop">⤢ full</button></span></div>
         <div class="flags" id="flags">
           <button data-s="strand"><span class="dot" style="background:var(--coral)"></span>Stranded</button>
           <button data-s="wave"><span class="dot" style="background:var(--wave)"></span>Wave ht</button>
           <button data-s="energy"><span class="dot" style="background:var(--energy)"></span>Energy</button>
-          <button data-s="velPeak"><span class="dot" style="background:var(--orbit)"></span>Orbital v · peak</button>
-          <button data-s="velMed"><span class="dot dash" style="background:var(--orbit)"></span>Orbital v · median</button>
+          <button data-s="velPeak"><span class="dot" style="background:var(--orbit)"></span>Stokes drift · peak</button>
+          <button data-s="velMed"><span class="dot dash" style="background:var(--orbit)"></span>Stokes drift · median</button>
         </div>
         <div class="body"><svg id="chartTop"></svg></div>
       </div>
@@ -147,7 +154,7 @@
         <div class="body"><div class="locrow"><svg id="coast"></svg><svg id="chartLoc"></svg></div></div>
       </div>
       <div class="tile" id="tileOrbit">
-        <div class="th"><span>Orbital motion at habitat depth</span><span class="thr"><span class="leg"><i style="color:var(--orbit)">diam</i> · <i style="color:var(--wave)">vel</i></span><button class="exp" data-tile="tileOrbit">⤢ full</button></span></div>
+        <div class="th"><span>Stokes drift at habitat depth</span><span class="thr"><span class="leg"><i style="color:var(--orbit)">diam</i> · <i style="color:var(--wave)">vel</i></span><button class="exp" data-tile="tileOrbit">⤢ full</button></span></div>
         <div class="orbctl">
           <div class="sl" style="flex:0 0 auto"><label>Source</label><div class="seg sm" id="srcSeg"><button data-src="week" class="on">Week</button><button data-src="manual">Manual</button></div></div>
           <div class="sl" id="hWrap"><label>Hs <span class="val" id="hVal"></span></label><input type="range" id="hRange" min="0.5" max="6" step="0.1" value="3"></div>
@@ -155,6 +162,7 @@
           <div class="sl"><label>Depth <span class="val" id="dVal"></span></label><input type="range" id="dRange" min="2" max="27" step="0.5" value="22"></div>
         </div>
         <div class="orbcharts"><svg id="orbCol"></svg><svg id="orbProf"></svg></div>
+        <div class="shorewrap"><div class="th2"><span>Time to reach shore · 1 km shoaling slope</span><span class="leg2">current swell (peak/max/mean/median) · marker = slider depth</span></div><div class="body2"><svg id="orbShore"></svg></div></div>
         <div class="readout" id="orbRead"></div>
         <div class="verdict" id="orbVerdict"></div>
       </div>
@@ -179,7 +187,8 @@
     <div style="overflow-x:auto"><table id="tbl"><thead><tr><th>Week ending</th><th>Stranded</th><th>Wave ht (m)</th><th>Swell period (s)</th><th>Swell dir</th><th>Energy (kW/m)</th><th>Wind (m/s)</th><th>Fetch (km)</th></tr></thead><tbody></tbody></table></div>
   </div>
   <div class="card prose"><h2>Methods</h2>
-    <p><b>Wave height (Hs)</b> is the model significant wave height; only the weekly aggregation is mine. <b>Orbital velocity</b> on the strandings chart is the near-bed max orbital velocity u = (πH/T)/sinh(kd) in cm/s, drawn as a <b>band spanning the 16–27 m habitat depths</b> (top edge = 16 m, faster; lower edge = 27 m). The <i>peak</i> band uses storm-peak-hour swell; the <i>median</i> band uses the week's median swell.</p>
+    <p><b>Wave height (Hs)</b> is the model significant wave height; only the weekly aggregation is mine. <b>Stokes drift</b> on the strandings chart is the <i>net mean</i> particle speed in the swell (shoreward) direction at the seabed — u<sub>s</sub> = (H/2)²·ω·k·cosh[2k(z+d)] / (2·sinh² kd) — in metres per minute (m/min), drawn as a <b>band across the 16–27 m habitat depths</b> (16 m edge faster). This is the <i>average along-swell speed</i>, NOT the instantaneous orbital velocity (which oscillates back and forth and nets zero). The <i>peak</i> band uses storm-peak swell; the <i>median</i> band uses the week's median swell.</p>
+    <p><b>Time to reach shore.</b> Over a seabed rising linearly from the starting depth to 0 across <b>1 km</b>, the time for Stokes drift alone to cover that kilometre is t = ∫ dx / u_s(d(x)). The drift strengthens as it shoals, so most time is spent in the deep starting zone and deeper starts take longer. Idealised: constant offshore wave height (no shoaling growth or breaking), bed Stokes drift, a passive particle, linear theory capped below ~0.6 m. Result is hours — roughly 1–3 h for a strong storm swell from 16–27 m, up to a day for a weak swell.</p>
     <p><b>Wave energy flux</b>: <span class="mono" style="color:var(--wave)">P ≈ 0.49·Hs²·T kW/m</span> (Te≈T proxy, slight over-estimate). <b>Fetch</b> (JONSWAP, from wind-sea): <span class="mono" style="color:var(--wave)">F = (U²/g)[g·Hm0/(0.0016·U²)]²</span>.</p>
     <p><b>Orbital motion</b> (linear theory, bed at z=−d):</p>
     <div class="formula">A=(H/2)cosh[k(z+d)]/sinh(kd)   u=(πH/T)cosh[k(z+d)]/sinh(kd)
@@ -209,6 +218,7 @@ const median=a=>{const s=[...a].sort((x,y)=>x-y);return s[Math.floor(s.length/2)
 const niceMax=v=>{if(v<=0)return 10;const p=Math.pow(10,Math.floor(Math.log10(v)));const f=v/p;return (f<=1?1:f<=2?2:f<=5?5:10)*p;};
 const wavelength=(T,d)=>{let L=G*T*T/(2*Math.PI);for(let i=0;i<60;i++)L=G*T*T/(2*Math.PI)*Math.tanh(2*Math.PI*d/L);return L;};
 const bedVel=(H,T,d)=>{if(H==null||T==null)return null;const L=wavelength(T,d),k=2*Math.PI/L,sh=Math.sinh(k*d);return (Math.PI*H/T)/sh*100;}; // cm/s
+const stokesBed=(H,T,d)=>{if(H==null||T==null)return null;const L=wavelength(T,d),k=2*Math.PI/L,w=2*Math.PI/T,sh=Math.sinh(k*d);return Math.pow(H/2,2)*w*k/(2*sh*sh)*60;}; // net along-swell drift, m/min
 
 let WEEKS=[],MAXEN=200,selected=9,AGG="peak",SRC="week";
 const SERIES={strand:true,wave:true,energy:true,velPeak:true,velMed:true};
@@ -237,6 +247,28 @@ function fetchKm(w){const U=val(w,"U"),Hw=val(w,"wwh");if(!U||U<1||Hw==null)retu
 function swellHT(wk,mode){if(mode==="peak")return{H:wk.peak?wk.peak.swh:null,T:wk.peak?wk.peak.swp:null};
   const hs=wk.hours.map(x=>x.swh).filter(v=>v!=null),ts=wk.hours.map(x=>x.swp).filter(v=>v!=null);return{H:hs.length?median(hs):null,T:ts.length?median(ts):null};}
 function velAt(wk,mode,dep){const {H,T}=swellHT(wk,mode);return bedVel(H,T,dep);}
+function driftAt(wk,mode,dep){const {H,T}=swellHT(wk,mode);return stokesBed(H,T,dep);}
+const stokesMps=(H,T,d)=>{if(H==null||T==null||d<=0)return null;const L=wavelength(T,d),k=2*Math.PI/L,w=2*Math.PI/T,sh=Math.sinh(k*d);return Math.pow(H/2,2)*w*k/(2*sh*sh);};
+function timeToShore(H,T,d0){if(H==null||T==null||d0<=0)return null;const X=1000,N=160,dmin=0.6;let t=0,dx=X/N;for(let i=0;i<N;i++){const x=(i+0.5)*dx;const d=Math.max(dmin,d0*x/X);const us=stokesMps(H,T,d);if(!us||us<=0)return null;t+=dx/us;}return t/3600;}
+function drawShore(){if(!WEEKS.length)return;const o=dims("orbShore"),w=o.w,h=o.h,el=o.el;
+  const L=46,T=16,B=h-30,R=w-12,dpMin=16,dpMax=27,xOf=dp=>L+(R-L)*((dp-dpMin)/(dpMax-dpMin));
+  const ht=getHT();const curves=[{H:ht.H,T:ht.T}];
+  const grid=[];for(let dp=dpMin;dp<=dpMax+1e-6;dp+=0.5)grid.push(dp);
+  const series=curves.map(c=>grid.map(dp=>timeToShore(c.H,c.T,dp)));
+  const allT=[];series.forEach(a=>a.forEach(v=>{if(v!=null&&isFinite(v))allT.push(v);}));if(!allT.length){el.innerHTML="";return;}
+  const maxT=Math.max(2,Math.ceil(Math.max(...allT)/2)*2),yOf=t=>B-(Math.min(t,maxT)/maxT)*(B-T);let s="";
+  for(let g=0;g<=maxT+1e-6;g+=maxT/4){const y=yOf(g);s+=gl(L,R,y)+`<text x="${L-6}" y="${y+4}" text-anchor="end" font-size="9" fill="var(--wave)" font-family="Spline Sans Mono,monospace">${Number.isInteger(g)?g:g.toFixed(1)}</text>`;}
+  [16,19,22,25,27].forEach(dp=>{const x=xOf(dp);s+=`<text x="${x}" y="${B+15}" text-anchor="middle" font-size="9" fill="var(--faint)" font-family="Spline Sans Mono,monospace">${dp}</text>`;});
+  s+=`<text x="${(L+R)/2}" y="${B+27}" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="Spline Sans Mono,monospace">starting depth (m)</text>`;
+  s+=`<text x="13" y="${(T+B)/2}" text-anchor="middle" font-size="9" fill="var(--wave)" transform="rotate(-90 13 ${(T+B)/2})">time to shore (h)</text>`;
+  if(series.length===2){const a=grid.map((dp,i)=>series[0][i]!=null?[xOf(dp),yOf(series[0][i])]:null).filter(Boolean),b=grid.map((dp,i)=>series[1][i]!=null?[xOf(dp),yOf(series[1][i])]:null).filter(Boolean);
+    if(a.length>1&&b.length>1){const poly=a.map(q=>q.join(",")).join(" ")+" "+b.slice().reverse().map(q=>q.join(",")).join(" ");
+      s+=`<polygon points="${poly}" fill="rgba(84,210,196,.14)" stroke="none"/>`;
+      s+=`<polyline points="${a.map(q=>q.join(",")).join(" ")}" fill="none" stroke="var(--wave)" stroke-width="2"/>`;
+      s+=`<polyline points="${b.map(q=>q.join(",")).join(" ")}" fill="none" stroke="var(--wave)" stroke-width="1.4" stroke-dasharray="5 4" opacity=".8"/>`;}}
+  else{const pts=grid.map((dp,i)=>series[0][i]!=null?[xOf(dp),yOf(series[0][i])]:null).filter(Boolean);if(pts.length>1)s+=`<polyline points="${pts.map(q=>q.join(",")).join(" ")}" fill="none" stroke="var(--wave)" stroke-width="2.2"/>`;}
+  const dd=+document.getElementById("dRange").value;if(dd>=dpMin&&dd<=dpMax){const x=xOf(dd);s+=`<line x1="${x}" y1="${T}" x2="${x}" y2="${B}" stroke="var(--coral)" stroke-dasharray="3 3"/>`;const tm=timeToShore(curves[0].H,curves[0].T,dd);if(tm!=null)s+=`<text x="${x}" y="${T-4}" text-anchor="middle" font-size="9" fill="var(--coral)" font-family="Spline Sans Mono,monospace">${fmt(tm,1)} h</text>`;}
+  el.innerHTML=s;}
 
 function dims(id){const el=document.getElementById(id);const r=el.getBoundingClientRect();
   const w=Math.max(220,Math.round(r.width)),h=Math.max(110,Math.round(r.height));
@@ -248,17 +280,18 @@ function redrawOne(id){({tileTop:drawTop,tileSwell:drawBot,tileWind:drawWind,
 /* ---- strandings + flagged series, orbital velocity as 16–27 m band ---- */
 function drawTop(){const {el,w,h}=dims("chartTop");const n=WEEKS.length;
   const right=[];if(SERIES.wave)right.push("wave");if(SERIES.energy)right.push("energy");if(SERIES.velPeak||SERIES.velMed)right.push("vel");
-  const L=40,T=14,B=h-40,R=Math.max(L+120,w-(8+38*right.length));
+  const L=40,T=22,B=h-40,R=Math.max(L+120,w-(10+42*right.length));
   const yS=v=>B-(v/100)*(B-T),yW=v=>B-(v/8)*(B-T),yE=v=>B-(v/MAXEN)*(B-T);
-  const allV=[];WEEKS.forEach(wk=>{if(SERIES.velPeak){const v=velAt(wk,"peak",HAB1);if(v!=null)allV.push(v);}if(SERIES.velMed){const v=velAt(wk,"median",HAB1);if(v!=null)allV.push(v);}});
+  const allV=[];WEEKS.forEach(wk=>{if(SERIES.velPeak){const v=driftAt(wk,"peak",HAB1);if(v!=null)allV.push(v);}if(SERIES.velMed){const v=driftAt(wk,"median",HAB1);if(v!=null)allV.push(v);}});
   const MAXV=niceMax(allV.length?Math.max(...allV):10);const yV=v=>B-(Math.min(v,MAXV)/MAXV)*(B-T);
   let s="";
   for(let g=0;g<=100;g+=20){const y=yS(g);s+=gl(L,R,y);if(SERIES.strand)s+=ytx(L-6,y,g,"--coral");}
-  right.forEach((rs,j)=>{const ax=R+6+38*j;let unit,col,scale,mx;
-    if(rs==="wave"){unit="m";col="--wave";scale=yW;mx=8;}else if(rs==="energy"){unit="kW/m";col="--energy";scale=yE;mx=MAXEN;}else{unit="cm/s";col="--orbit";scale=yV;mx=MAXV;}
-    for(let g=0;g<=mx;g+=mx/4)s+=`<text x="${ax}" y="${scale(g)+4}" font-size="10" fill="var(${col})" font-family="Spline Sans Mono,monospace">${mx>=20?Math.round(g):g}</text>`;
-    s+=`<text x="${ax}" y="11" font-size="9" fill="var(${col})" font-family="Spline Sans Mono,monospace">${unit}</text>`;});
-  function band(mode,fill,dash){const pr=WEEKS.map((wk,i)=>{const a=velAt(wk,mode,HAB1),b=velAt(wk,mode,HAB2);
+  const axName={wave:"wave ht",energy:"energy",vel:"Stokes drift"};
+  right.forEach((rs,j)=>{const ax=R+8+42*j;let unit,col,scale,mx;
+    if(rs==="wave"){unit="m";col="--wave";scale=yW;mx=8;}else if(rs==="energy"){unit="kW/m";col="--energy";scale=yE;mx=MAXEN;}else{unit="m/min";col="--orbit";scale=yV;mx=MAXV;}
+    s+=`<text x="${ax-2}" y="9" font-size="9.5" font-weight="600" fill="var(${col})" font-family="Spline Sans Mono,monospace">${unit}</text>`;
+    for(let g=0;g<=mx;g+=mx/4)s+=`<text x="${ax}" y="${scale(g)+4}" font-size="10" fill="var(${col})" font-family="Spline Sans Mono,monospace">${mx>=20?Math.round(g):g}</text>`;});
+  function band(mode,fill,dash){const pr=WEEKS.map((wk,i)=>{const a=driftAt(wk,mode,HAB1),b=driftAt(wk,mode,HAB2);
       return(a!=null&&b!=null)?{x:xs(i,n,L+16,R-16),t:yV(a),b:yV(b)}:null;}).filter(Boolean);
     if(pr.length<2)return"";
     const poly=pr.map(p=>p.x.toFixed(1)+","+p.t.toFixed(1)).join(" ")+" "+pr.slice().reverse().map(p=>p.x.toFixed(1)+","+p.b.toFixed(1)).join(" ");
@@ -358,21 +391,21 @@ function drawOrbital(){if(!WEEKS.length)return;const {H,T}=getHT(),d=+document.g
     s+=`<text x="9" y="${bed-5}" font-size="8.5" fill="var(--faint)" font-family="Spline Sans Mono,monospace">bed ${fmt(d)}m</text>`;
     [0,d*0.33,d*0.66,d].forEach(hh=>{const cy=yOf(hh),rx=Math.max(1,A(hh)*sc),ry=Math.max(.5,Bv(hh)*sc);
       s+=`<ellipse cx="${cx}" cy="${cy}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="none" stroke="var(--orbit)" stroke-width="1.5"/><text x="${cx+rx+6}" y="${cy+3}" font-size="8.5" fill="var(--faint)" font-family="Spline Sans Mono,monospace">${fmt(hh)}m</text>`;});
-    s+=`<text x="${cx}" y="12" text-anchor="middle" font-size="9.5" fill="var(--muted)" font-family="Spline Sans Mono,monospace">orbit vs depth</text>`;el.innerHTML=s;})();
+    s+=`<text x="${cx}" y="12" text-anchor="middle" font-size="9.5" fill="var(--muted)" font-family="Spline Sans Mono,monospace">wave orbits</text>`;el.innerHTML=s;})();
   (function(){const {el,w,h}=dims("orbProf");const Lx=46,Rx=w-14,T2=22,B2=h-22;const yOf=hh=>T2+(B2-T2)*(hh/d);
-    const maxD=Math.max(2*A(0),.5),maxV=Math.max(U(0),.1),xD=v=>Lx+(Rx-Lx)*(v/maxD),xV=v=>Lx+(Rx-Lx)*(v/maxV);let s="";
+    const maxD=Math.max(2*A(0),.5),maxS=Math.max(Us(0)*60,0.5),xD=v=>Lx+(Rx-Lx)*(v/maxD),xS=v=>Lx+(Rx-Lx)*(v/maxS);let s="";
     const hb1=Math.min(HAB1,d),hb2=Math.min(HAB2,d);
     s+=`<rect x="${Lx}" y="${yOf(hb1)}" width="${Rx-Lx}" height="${yOf(hb2)-yOf(hb1)}" fill="rgba(255,155,208,.10)"/>`;
     for(let hh=0;hh<=d+.01;hh+=d/4){const y=yOf(hh);s+=gl(Lx,Rx,y)+`<text x="${Lx-6}" y="${y+4}" text-anchor="end" font-size="9" fill="var(--faint)" font-family="Spline Sans Mono,monospace">${fmt(hh)}</text>`;}
-    let pd="",pv="";for(let hh=0;hh<=d;hh+=d/40){pd+=(pd?" L":"M")+xD(2*A(hh)).toFixed(1)+" "+yOf(hh).toFixed(1);pv+=(pv?" L":"M")+xV(U(hh)).toFixed(1)+" "+yOf(hh).toFixed(1);}
+    let pd="",pv="";for(let hh=0;hh<=d;hh+=d/40){pd+=(pd?" L":"M")+xD(2*A(hh)).toFixed(1)+" "+yOf(hh).toFixed(1);pv+=(pv?" L":"M")+xS(Us(hh)*60).toFixed(1)+" "+yOf(hh).toFixed(1);}
     s+=`<path d="${pd}" stroke="var(--orbit)" stroke-width="2.2" fill="none"/><path d="${pv}" stroke="var(--wave)" stroke-width="2.2" fill="none"/>`;
-    s+=`<circle cx="${xD(2*A(d))}" cy="${yOf(d)}" r="3" fill="var(--orbit)"/><circle cx="${xV(U(d))}" cy="${yOf(d)}" r="3" fill="var(--wave)"/>`;
-    s+=`<text x="${Lx}" y="14" font-size="9" fill="var(--orbit)">diam→ ${fmt(maxD)}m</text><text x="${Rx}" y="14" text-anchor="end" font-size="9" fill="var(--wave)">←vel ${fmt(maxV)}m/s</text>`;
+    s+=`<circle cx="${xD(2*A(d))}" cy="${yOf(d)}" r="3" fill="var(--orbit)"/><circle cx="${xS(Us(d)*60)}" cy="${yOf(d)}" r="3" fill="var(--wave)"/>`;
+    s+=`<text x="${Lx}" y="14" font-size="9" fill="var(--orbit)">orbit Ø→ ${fmt(maxD)}m</text><text x="${Rx}" y="14" text-anchor="end" font-size="9" fill="var(--wave)">←Stokes ${fmt(maxS,1)} m/min</text>`;
     s+=`<text x="14" y="${(T2+B2)/2}" text-anchor="middle" font-size="9" fill="var(--muted)" transform="rotate(-90 14 ${(T2+B2)/2})">depth m</text>`;el.innerHTML=s;})();
-  document.getElementById("orbRead").innerHTML=[["Wavelength",fmt(L,0),"m"],["Regime",dL<0.05?"shallow":dL<0.5?"intermed.":"deep",`d/L ${fmt(dL,3)}`],["Bed velocity",fmt(uBed*100,0),"cm/s"],["Stokes drift",fmt(usBed*100,1),"cm/s"]]
+  document.getElementById("orbRead").innerHTML=[["Wavelength",fmt(L,0),"m"],["Regime",dL<0.05?"shallow":dL<0.5?"intermed.":"deep",`d/L ${fmt(dL,3)}`],["Stokes drift",fmt(usBed*60,2),"m/min"],["Net transport",fmt(usBed*86.4,1),"km/day"]]
     .map(([k,v,u])=>`<div><div class="k">${k}</div><div class="v">${v} <small>${u}</small></div></div>`).join("");
-  const fast=uBed>0.3,nd=dirVal(WEEKS[selected]||WEEKS[9],"swd");
-  document.getElementById("orbVerdict").innerHTML=`<b>${dL<0.5?"Intermediate-depth":"Deep-water"}</b> — motion ${dL<0.5?"reaches the bed":"decays first"}: ~<b>${fmt(2*aBed)}m</b> surge at <b>${fmt(uBed*100,0)} cm/s</b>${fast?", beyond a seadragon's swimming once kelp is stripped":""}. Closed orbits carry nothing, but <b>Stokes drift ${fmt(usBed*100,1)} cm/s</b> pushes ${nd!=null?"toward <b>"+compassOf((nd+180)%360)+"</b>":"along swell"} — shoreward.`;}
+  const nd=dirVal(WEEKS[selected]||WEEKS[9],"swd");
+  document.getElementById("orbVerdict").innerHTML=`<b>${dL<0.5?"Intermediate-depth":"Deep-water"}</b> field (d/L ${fmt(dL,3)}) — the swell ${dL<0.5?"reaches the seabed":"barely reaches the bed"}. Net along-swell <b>Stokes drift</b> at ${fmt(d)} m is <b>${fmt(usBed*60,2)} m/min</b> (~${fmt(usBed*86.4,1)} km/day) ${nd!=null?"toward <b>"+compassOf((nd+180)%360)+"</b>":"along the swell"} — shoreward. Tiny per second, but sustained over a multi-day storm it can carry a dislodged, weak-swimming seadragon kilometres inshore.`;drawShore();}
 
 function gl(L,R,y){return `<line x1="${L}" y1="${y}" x2="${R}" y2="${y}" stroke="var(--grid)"/>`;}
 function ytx(x,y,t,c){return `<text x="${x}" y="${y+4}" text-anchor="end" font-size="10" fill="var(${c})" font-family="Spline Sans Mono,monospace">${t}</text>`;}
@@ -419,7 +452,8 @@ Provenance and interpretation rules you MUST apply and surface when relevant:
 - Wave height, swell, wind and energy are an Open-Meteo numerical MODEL hindcast at ~33.8S,151.4E, NOT in-situ buoy measurements. Always treat them as modelled; the in-situ source would be the MHL Sydney Directional Waverider.
 - Wave energy flux P=0.49*Hs^2*T kW/m uses peak period as an energy-period proxy, so it slightly OVER-estimates (true Te=0.86*T).
 - "Implied fetch" is back-calculated from wind-sea via JONSWAP. When it runs to thousands of km the local wind could NOT have built that sea: it is long-period SWELL from a distant east-coast low, which drives the deep orbital motion.
-- Orbital velocity is the near-bed max orbital velocity from linear wave theory, given as a BAND across the 16-27 m seadragon habitat depths (cm/s; the 16 m edge is faster).
+- The plotted drift speed is the STOKES DRIFT: the net mean particle velocity in the swell (shoreward) direction at the seabed, as a BAND across the 16-27 m habitat depths (m/min; 16 m edge faster). This is NOT orbital velocity (the instantaneous oscillatory speed, which nets zero) — never call it orbital velocity. Stokes drift is small (a few m/min) but steady, integrating to kilometres of shoreward transport over a multi-day storm.
+- A "Time to reach shore" chart estimates how long Stokes drift alone needs to carry an animal the 1 km to shore over a linearly shoaling seabed (starting depth d0 down to 0); deeper starts take longer; values are HOURS and assume constant offshore wave height, bed Stokes drift, a passive particle, and linear theory (capped in the surf zone). Treat as an idealised wave-only estimate, not total transport.
 - Mechanism: closed wave orbits give ZERO net transport; the net along-swell (shoreward) push is the second-order Stokes drift. At 16-27 m under 12-14 s swell the water is intermediate-depth, so the orbital surge reaches the seabed. Seadragons are negatively buoyant, weak swimmers, so strong near-bed surge once kelp is stripped, plus Stokes drift, plausibly displaces them shoreward.
 - Distinguish real signal from modelling caveats. The dashboard correlates conditions with strandings; it does not prove mechanism. Do not overclaim causation.`;
 const aiR=(v,p=1)=>(v==null||isNaN(v)||!isFinite(v))?null:+(+v).toFixed(p);
@@ -429,10 +463,10 @@ function aiProfile(){const d=+document.getElementById("dRange").value;const ht=g
     weeks:WEEKS.map((wk,i)=>{const dir=dirVal(wk,"swd");return{week_ending:labels[i],stranded:wk.count,wave_height_m:aiR(val(wk,"wh")),
       swell_period_s:aiR(val(wk,"swp")),swell_dir_deg:aiR(dir,0),swell_from:dir!=null?compassOf(dir):null,energy_kW_per_m:aiR(val(wk,"E"),0),
       wind_ms:aiR(val(wk,"U")),implied_fetch_km:aiR(fetchKm(wk),0),
-      orbVel_cmps_peak_16and27:[aiR(velAt(wk,"peak",16),0),aiR(velAt(wk,"peak",27),0)],
-      orbVel_cmps_median_16and27:[aiR(velAt(wk,"median",16),0),aiR(velAt(wk,"median",27),0)]};}),
+      stokesDrift_m_per_min_peak_16and27:[aiR(driftAt(wk,"peak",16),2),aiR(driftAt(wk,"peak",27),2)],
+      stokesDrift_m_per_min_median_16and27:[aiR(driftAt(wk,"median",16),2),aiR(driftAt(wk,"median",27),2)]};}),
     regions:REGIONS.map(r=>({name:r.name,mar:r.mar,apr:r.apr,may:r.may,total:r.mar+r.apr+r.may})),
-    orbital_panel:{source:SRC,Hs_m:aiR(ht.H),period_s:aiR(ht.T),depth_m:d}};}
+    orbital_panel:{source:SRC,Hs_m:aiR(ht.H),period_s:aiR(ht.T),depth_m:d},time_to_reach_shore_h_peakSwell:(()=>{const p=swellHT(WEEKS[selected]||WEEKS[9],"peak");return{at16m:aiR(timeToShore(p.H,p.T,16),2),at27m:aiR(timeToShore(p.H,p.T,27),2),model:"Stokes drift over 1km linear shoaling slope, idealised"};})()};}
 const aiEl=id=>document.getElementById(id);
 function aiOpen(){aiEl("ai").classList.add("open");aiEl("aiScrim").classList.add("open");if(!aiHistory.length)aiGreet();aiEl("aiText").focus();}
 function aiClose(){aiEl("ai").classList.remove("open");aiEl("aiScrim").classList.remove("open");}
